@@ -1,0 +1,10 @@
+package com.gs.rules.engine.rules
+
+import  com.gs.rules.engine.fact.TestPojo;
+
+rule "test2"
+    when
+        $pojo : TestPojo(name == "name2")
+    then
+        $pojo.setDistribute(true);
+end
