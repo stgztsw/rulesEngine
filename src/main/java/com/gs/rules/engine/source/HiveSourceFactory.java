@@ -24,7 +24,7 @@ public class HiveSourceFactory {
     // set the HiveCatalog as the current catalog of the session
     tableEnv.useCatalog(ruleProperties.getHiveSourceTable());
     Table table = tableEnv.from(ruleProperties.getHiveSourceTable())
-        .filter(($("name")).isEqual(ruleProperties.getBizDate()));
+        .filter(($("pt")).isEqual(ruleProperties.getBizDate()));
     tableEnv.useCatalog(DEFAULT_CATALOG);
     return tableEnv.toDataStream(table);
   }
