@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.gs.rules.engine.config.ConfigConstant.APP_ID;
+import static com.gs.rules.engine.config.ConfigConstant.BIZ_DATE;
 import static com.gs.rules.engine.config.ConfigConstant.HIVE_SOURCE_DB;
 import static com.gs.rules.engine.config.ConfigConstant.HIVE_SOURCE_TABLE;
 import static com.gs.rules.engine.config.ConfigConstant.RULE_FACT_NAME;
@@ -107,6 +108,9 @@ public class BatchJob {
 		}
 		if (ruleProperties.getRuleFactName() == null) {
 			throw new RuntimeException(String.format("Param %s can not null", RULE_FACT_NAME));
+		}
+		if (ruleProperties.getBizDate() == null) {
+			throw new RuntimeException(String.format("Param %s can not null", BIZ_DATE));
 		}
 	}
 
