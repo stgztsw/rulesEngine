@@ -18,16 +18,13 @@
 
 package com.gs.rules.engine;
 
-import com.google.gson.JsonObject;
 import com.gs.rules.engine.config.RuleEngineProperties;
 import com.gs.rules.engine.process.RuleProcessFunction;
 import com.gs.rules.engine.sink.HiveSinkGS;
-import com.gs.rules.engine.sink.KafkaSinkGS;
 import com.gs.rules.engine.source.HiveSourceFactory;
 import com.gs.rules.engine.source.RuleSourceFactory;
 import com.gs.rules.engine.util.TypeUtil;
 import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.BroadcastConnectedStream;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
@@ -35,13 +32,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Schema;
-import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.runtime.typeutils.ExternalTypeInfo;
-import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,18 +72,12 @@ public class BatchJob {
 		DataStream<Row> hiveSourceTableStream = HiveSourceFactory.getHiveSource(tableEnv, ruleProperties);
 		BroadcastStream<Row> ruleBroadcastSource = RuleSourceFactory.getRuleBroadcastSource(tableEnv, ruleProperties);
 		BroadcastConnectedStream<Row, Row> connectedStream =  hiveSourceTableStream.connect(ruleBroadcastSource);
-		ExternalTypeInfo<Row> externalTypeInfo = ExternalTypeInfo.of(
-				DataTypes.ROW(
-						DataTypes.FIELD("id", DataTypes.STRING()),
-						DataTypes.FIELD("name", DataTypes.STRING()),
-						DataTypes.FIELD("start_day", DataTypes.STRING()),
-						DataTypes.FIELD("end_day", DataTypes.STRING()),
-						DataTypes.FIELD("distribute", DataTypes.BOOLEAN())));
 		SingleOutputStreamOperator<Row> singleOutput = connectedStream.process(
 				new RuleProcessFunction(
 						ruleProperties.getRulePackageName(),
 						ruleProperties.getRuleFactName()))
-				.returns(TypeUtil.convertExternalTypeInfo(
+				.returns(
+						TypeUtil.convertExternalTypeInfo(
 						(ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
 		//distribute为true的数据
 		singleOutput.filter(new FilterFunction<Row>() {
@@ -98,15 +85,11 @@ public class BatchJob {
 			public boolean filter(Row value) throws Exception {
 				return value.getFieldAs("distribute");
 			}
-		//转换成String格式
 		});
 //		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
-		HiveSinkGS.toSink(tableEnv, singleOutput, ruleProperties);
+		HiveSinkGS.toSink(tableEnv, singleOutput,
+				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()), ruleProperties);
 		env.execute("Flink batch rule engine");
-	}
-
-	private static Class<Row> connectedStreamType(TypeInformation<Row> type) {
-		return null;
 	}
 
 	private static void validateParam(RuleEngineProperties ruleProperties) {

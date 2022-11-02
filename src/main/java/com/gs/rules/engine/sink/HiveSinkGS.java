@@ -16,6 +16,7 @@ public class HiveSinkGS {
 
   public static void toSink(StreamTableEnvironment tableEnv,
                                        DataStream<Row> dataStream,
+                                       Schema schema,
                                        RuleEngineProperties ruleProperties) {
     HiveCatalog hive = new HiveCatalog(
         ruleProperties.getHiveSinkTable(),
@@ -26,12 +27,6 @@ public class HiveSinkGS {
 
     // set the HiveCatalog as the current catalog of the session
     tableEnv.useCatalog(ruleProperties.getHiveSinkTable());
-    Schema schema = Schema.newBuilder()
-        .column("id", DataTypes.STRING())
-        .column("name", DataTypes.STRING())
-        .column("start_day", DataTypes.STRING())
-        .column("end_day", DataTypes.STRING())
-        .column("distribute", DataTypes.BOOLEAN()).build();
     Table table = tableEnv.fromDataStream(dataStream, schema);
     table.executeInsert(ruleProperties.getHiveSinkTable(), true);
     tableEnv.useCatalog(DEFAULT_CATALOG);
