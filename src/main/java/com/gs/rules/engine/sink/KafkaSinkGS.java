@@ -8,10 +8,12 @@ import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.types.Row;
 
+import java.util.Objects;
 import java.util.Properties;
 
-public class KafkaSinkGS {
+public class KafkaSinkGS extends BaseSink {
 
   private RuleEngineProperties ruleProperties;
 
@@ -19,14 +21,27 @@ public class KafkaSinkGS {
     this.ruleProperties = ruleProperties;
   }
 
-  public void toSink(DataStream<JsonObject> dataStream) {
+  public void toSink(DataStream<Row> dataStream) {
     KafkaSink<String> sink = getKafkaSink(ruleProperties);
-    dataStream.map(new MapFunction<JsonObject, String>() {
+    DataStream<String> jsonStrStream = convert(dataStream);
+    jsonStrStream.sinkTo(sink);
+  }
+
+  private DataStream<String> convert(DataStream<Row> dataStream) {
+    return dataStream.map(new MapFunction<Row, String>() {
       @Override
-      public String map(JsonObject value) throws Exception {
-        return value.toString();
+      public String map(Row value) throws Exception {
+        JsonObject jsonObject = new JsonObject();
+        for(String fieldName: Objects.requireNonNull(value.getFieldNames(true))) {
+          jsonObject.addProperty(fieldName, value(value.getFieldAs(fieldName)));
+        }
+        return jsonObject.toString();
       }
-    }).sinkTo(sink);
+    });
+  }
+
+  private String value(Object fieldAs) {
+    return fieldAs instanceof java.lang.String ? fieldAs.toString() : String.valueOf(fieldAs);
   }
 
   private KafkaSink<String> getKafkaSink(RuleEngineProperties ruleProperties) {

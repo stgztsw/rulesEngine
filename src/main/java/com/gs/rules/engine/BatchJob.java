@@ -21,6 +21,7 @@ package com.gs.rules.engine;
 import com.gs.rules.engine.config.RuleEngineProperties;
 import com.gs.rules.engine.process.RuleProcessFunction;
 import com.gs.rules.engine.sink.HiveSinkGS;
+import com.gs.rules.engine.sink.KafkaSinkGS;
 import com.gs.rules.engine.source.HiveSourceFactory;
 import com.gs.rules.engine.source.RuleSourceFactory;
 import com.gs.rules.engine.util.TypeUtil;
@@ -81,15 +82,17 @@ public class BatchJob {
 						TypeUtil.convertExternalTypeInfo(
 						(ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
 		//distribute为true的数据
-		singleOutput.filter(new FilterFunction<Row>() {
+		DataStream<Row> engineResult = singleOutput.filter(new FilterFunction<Row>() {
 			@Override
 			public boolean filter(Row value) throws Exception {
 				return value.getFieldAs("distribute");
 			}
 		});
-//		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
-		HiveSinkGS.toSink(tableEnv, singleOutput,
-				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()), ruleProperties);
+//		HiveSinkGS hiveSinkGS = new HiveSinkGS(ruleProperties);
+//		hiveSinkGS.toSink(tableEnv, engineResult,
+//				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
+		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
+		kafkaSinkGS.toSink(engineResult);
 		env.execute("Flink batch rule engine");
 	}
 

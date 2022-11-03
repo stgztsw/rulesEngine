@@ -8,14 +8,18 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.types.Row;
 
-public class HiveSinkGS {
+public class HiveSinkGS extends BaseSink{
 
   private final static String DEFAULT_CATALOG = "default_catalog";
+  private RuleEngineProperties ruleProperties;
 
-  public static void toSink(StreamTableEnvironment tableEnv,
-                                       DataStream<Row> dataStream,
-                                       Schema schema,
-                                       RuleEngineProperties ruleProperties) {
+  public HiveSinkGS(RuleEngineProperties ruleProperties) {
+    this.ruleProperties = ruleProperties;
+  }
+
+  public void toSink(StreamTableEnvironment tableEnv,
+                            DataStream<Row> dataStream,
+                            Schema schema) {
     HiveCatalog hive = new HiveCatalog(
         ruleProperties.getHiveSinkTable(),
         ruleProperties.getHiveSinkDB(),
@@ -29,6 +33,5 @@ public class HiveSinkGS {
     table.executeInsert(ruleProperties.getHiveSinkTable(), true);
     tableEnv.useCatalog(DEFAULT_CATALOG);
   }
-
 
 }

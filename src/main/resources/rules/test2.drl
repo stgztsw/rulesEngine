@@ -1,10 +1,33 @@
 package com.gs.rules.engine.rules
 
-import  com.gs.rules.engine.fact.TestPojo;
+declare IeTicketDistributePojo
+    robot_sn: String  //机器sn
+    ticket_desc: String //
+    robot_abnormal_score: Double //年龄
+    daily_active_score: Double // 开始日期
+    distribute_score: Double // 结束日期
+    openning_ticket_cnt: Long //未关闭的工单数量
+    customer_grade: String //客户等级
+    robot_name: String //机器人名
+    terminal_user_name: String //终端客户名
+    terminal_user_group_name: String //终端客户组名,
+    group_customer_grade: String //客户组等级
+    robot_faimly_code: String //机器型号
+    scene: String //场景
+    business_area: String //运维大区
+    province: String //所属省
+    city: String  //所属城市
+    county: String //所属区
+    country: String //所属国家
+    delivery_date: java.time.LocalDate //交付日期
+    status: String //状态
+    distribute: Boolean //是否需要推送
+    pt: String //分区
+end
 
-rule "test2"
+rule "rule1"
     when
-        $pojo : TestPojo(name == "name2")
+        $pojo : IeTicketDistributePojo(daily_active_score > 60 && customer_grade == 'KA')
     then
         $pojo.setDistribute(true);
 end
