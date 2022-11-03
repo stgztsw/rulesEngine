@@ -11,7 +11,7 @@ import org.apache.flink.types.Row;
 public class HiveSinkGS extends BaseSink{
 
   private final static String DEFAULT_CATALOG = "default_catalog";
-  private RuleEngineProperties ruleProperties;
+  private final RuleEngineProperties ruleProperties;
 
   public HiveSinkGS(RuleEngineProperties ruleProperties) {
     this.ruleProperties = ruleProperties;

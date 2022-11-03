@@ -15,7 +15,7 @@ import java.util.Properties;
 
 public class KafkaSinkGS extends BaseSink {
 
-  private RuleEngineProperties ruleProperties;
+  private final RuleEngineProperties ruleProperties;
 
   public KafkaSinkGS(RuleEngineProperties ruleProperties) {
     this.ruleProperties = ruleProperties;
