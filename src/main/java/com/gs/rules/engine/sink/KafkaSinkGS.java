@@ -2,6 +2,7 @@ package com.gs.rules.engine.sink;
 
 import com.google.gson.JsonObject;
 import com.gs.rules.engine.config.RuleEngineProperties;
+import com.gs.rules.engine.format.SimpleStringKafkaKeySchema;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -51,6 +52,7 @@ public class KafkaSinkGS extends BaseSink {
         .setKafkaProducerConfig(kafkaProducerConfig)
         .setRecordSerializer(KafkaRecordSerializationSchema.builder()
             .setTopic(ruleProperties.getKafkaSinkTopic())
+            .setKeySerializationSchema(new SimpleStringKafkaKeySchema())
             .setValueSerializationSchema(new SimpleStringSchema())
             .build()
         )

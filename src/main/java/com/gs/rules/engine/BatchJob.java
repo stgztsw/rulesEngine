@@ -88,11 +88,11 @@ public class BatchJob {
 				return value.getFieldAs("distribute");
 			}
 		});
-//		HiveSinkGS hiveSinkGS = new HiveSinkGS(ruleProperties);
-//		hiveSinkGS.toSink(tableEnv, engineResult,
-//				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
-		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
-		kafkaSinkGS.toSink(engineResult);
+		HiveSinkGS hiveSinkGS = new HiveSinkGS(ruleProperties);
+		hiveSinkGS.toSink(tableEnv, engineResult,
+				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
+//		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
+//		kafkaSinkGS.toSink(engineResult);
 		env.execute("Flink batch rule engine");
 	}
 

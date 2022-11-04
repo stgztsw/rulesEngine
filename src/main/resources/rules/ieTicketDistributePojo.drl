@@ -2,10 +2,23 @@ package com.gs.rules.engine.rules
 
 declare IeTicketDistributePojo
     robot_sn: String  //机器sn
-    ticket_desc: String //
+    ticket_desc: String //工单描述
+    ticket_category: String //工单分类
+    guarantees: String //保内保外
+    charge_type: String //工时收费
+    serve_type: String //现场处理
+    incident_desc: String //故障描述
+    fae: String //fae
     robot_abnormal_score: Double //年龄
     daily_active_score: Double // 开始日期
     distribute_score: Double // 结束日期
+    daily_7_view: String //T7日活
+    daily_6_view: String //T6日活
+    daily_5_view: String //T5日活
+    daily_4_view: String //T4日活
+    daily_3_view: String //T3日活
+    daily_2_view: String //T2日活
+    daily_1_view: String //T1日活
     openning_ticket_cnt: Long //未关闭的工单数量
     customer_grade: String //客户等级
     robot_name: String //机器人名
