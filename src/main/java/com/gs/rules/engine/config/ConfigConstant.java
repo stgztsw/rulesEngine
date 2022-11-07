@@ -4,11 +4,9 @@ public interface ConfigConstant {
 
   String APP_ID = "app.id";
   String BIZ_DATE = "biz.date";
+  String RUN_MODE = "run.mode";
 
   //flink
-  String FLINK_MODE = "mode";
-  String MODE_TEST = "test";
-  String MODE_PROD = "prod";
   String FLINK_PARALLELISM = "flink.parallelism";
   String FLINK_ENABLE_CHECKPOINT = "flink.enable.checkpoint";
   String FLINK_CHECKPOINT_INTERVAL = "flink.checkpoint.interval";

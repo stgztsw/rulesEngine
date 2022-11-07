@@ -1,5 +1,7 @@
 package com.gs.rules.engine.util;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.runtime.typeutils.ExternalTypeInfo;
@@ -46,6 +48,10 @@ public class TypeUtil {
     builder.column("distribute", DataTypes.BOOLEAN());
     builder.column("pt", DataTypes.STRING());
     return builder.build();
+  }
+
+  public static Schema convert2Schema(TypeInformation<Row> typeInformation) {
+    return convert2Schema((ExternalTypeInfo<Row>)typeInformation);
   }
 
   private static DataType logicalType2DataTypes(LogicalType logicalType) {

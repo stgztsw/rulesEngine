@@ -18,14 +18,13 @@
 
 package com.gs.rules.engine;
 
+import com.gs.rules.engine.common.ParamValidator;
 import com.gs.rules.engine.config.RuleEngineProperties;
 import com.gs.rules.engine.process.RuleProcessFunction;
-import com.gs.rules.engine.sink.HiveSinkGS;
-import com.gs.rules.engine.sink.KafkaSinkGS;
+import com.gs.rules.engine.process.SinkProcess;
 import com.gs.rules.engine.source.HiveSourceFactory;
 import com.gs.rules.engine.source.RuleSourceFactory;
 import com.gs.rules.engine.util.TypeUtil;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.BroadcastConnectedStream;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
@@ -39,13 +38,6 @@ import org.apache.flink.table.runtime.typeutils.ExternalTypeInfo;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.gs.rules.engine.config.ConfigConstant.APP_ID;
-import static com.gs.rules.engine.config.ConfigConstant.BIZ_DATE;
-import static com.gs.rules.engine.config.ConfigConstant.HIVE_SOURCE_DB;
-import static com.gs.rules.engine.config.ConfigConstant.HIVE_SOURCE_TABLE;
-import static com.gs.rules.engine.config.ConfigConstant.RULE_FACT_NAME;
-import static com.gs.rules.engine.config.ConfigConstant.RULE_PACKAGE_NAME;
 
 /**
  * Skeleton for a Flink Streaming Job.
@@ -67,7 +59,7 @@ public class BatchJob {
 		ParameterTool params = ParameterTool.fromArgs(args);
 		RuleEngineProperties ruleProperties = RuleEngineProperties.getInstance(params);
 		ruleProperties.init();
-		validateParam(ruleProperties);
+		ParamValidator.validate(ruleProperties);
 		StreamExecutionEnvironment env = getStreamExecutionEnvironment(ruleProperties);
 		StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings.inBatchMode());
 
@@ -78,45 +70,13 @@ public class BatchJob {
 				new RuleProcessFunction(
 						ruleProperties.getRulePackageName(),
 						ruleProperties.getRuleFactName()))
-				.returns(
-						TypeUtil.convertExternalTypeInfo(
+				.returns(TypeUtil.convertExternalTypeInfo(
 						(ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
-		//distribute为true的数据
-		DataStream<Row> engineResult = singleOutput.filter(new FilterFunction<Row>() {
-			@Override
-			public boolean filter(Row value) throws Exception {
-				return value.getFieldAs("distribute");
-			}
-		});
-		HiveSinkGS hiveSinkGS = new HiveSinkGS(ruleProperties);
-		hiveSinkGS.toSink(tableEnv, engineResult,
-				TypeUtil.convert2Schema((ExternalTypeInfo<Row>)hiveSourceTableStream.getType()));
-//		KafkaSinkGS kafkaSinkGS = new KafkaSinkGS(ruleProperties);
-//		kafkaSinkGS.toSink(engineResult);
+		SinkProcess sinkProcess = new SinkProcess(ruleProperties, tableEnv,
+				TypeUtil.convert2Schema(hiveSourceTableStream.getType()));
+		sinkProcess.toSink(singleOutput);
 		env.execute("Flink batch rule engine");
 	}
-
-	private static void validateParam(RuleEngineProperties ruleProperties) {
-		if (ruleProperties.getHiveSourceDB() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", HIVE_SOURCE_DB));
-		}
-		if (ruleProperties.getHiveSourceTable() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", HIVE_SOURCE_TABLE));
-		}
-		if (ruleProperties.getAppID() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", APP_ID));
-		}
-		if (ruleProperties.getRulePackageName() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", RULE_PACKAGE_NAME));
-		}
-		if (ruleProperties.getRuleFactName() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", RULE_FACT_NAME));
-		}
-		if (ruleProperties.getBizDate() == null) {
-			throw new RuntimeException(String.format("Param %s can not null", BIZ_DATE));
-		}
-	}
-
 
 	private static StreamExecutionEnvironment getStreamExecutionEnvironment(RuleEngineProperties ruleProperties) {
 		int globalParallelism = ruleProperties.getFlinkParallelism();
@@ -133,4 +93,6 @@ public class BatchJob {
 		}
 		return env;
 	}
+
+
 }

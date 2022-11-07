@@ -40,7 +40,7 @@ end
 
 rule "rule1"
     when
-        $pojo : IeTicketDistributePojo(daily_active_score > 60 && customer_grade == 'KA')
+        $pojo : IeTicketDistributePojo(distribute_score > 60)
     then
         $pojo.setDistribute(true);
 end

@@ -12,14 +12,16 @@ public class HiveSinkGS extends BaseSink{
 
   private final static String DEFAULT_CATALOG = "default_catalog";
   private final RuleEngineProperties ruleProperties;
+  private final StreamTableEnvironment tableEnv;
+  private final Schema schema;
 
-  public HiveSinkGS(RuleEngineProperties ruleProperties) {
+  public HiveSinkGS(RuleEngineProperties ruleProperties, StreamTableEnvironment tableEnv, Schema schema) {
     this.ruleProperties = ruleProperties;
+    this.tableEnv = tableEnv;
+    this.schema = schema;
   }
 
-  public void toSink(StreamTableEnvironment tableEnv,
-                            DataStream<Row> dataStream,
-                            Schema schema) {
+  public void toSink(DataStream<Row> dataStream) {
     HiveCatalog hive = new HiveCatalog(
         ruleProperties.getHiveSinkTable(),
         ruleProperties.getHiveSinkDB(),

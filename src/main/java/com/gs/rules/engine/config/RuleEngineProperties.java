@@ -1,5 +1,6 @@
 package com.gs.rules.engine.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,11 @@ public class RuleEngineProperties implements Serializable {
 
   public String getBizDate() {
     return params.get(ConfigConstant.BIZ_DATE);
+  }
+
+  public String getRunMode() {
+    String runMode = params.get(ConfigConstant.RUN_MODE);
+    return StringUtils.isBlank(runMode) ? PROPERTIES.getProperty(ConfigConstant.RUN_MODE) : runMode;
   }
 
   public String getHiveConf() {
