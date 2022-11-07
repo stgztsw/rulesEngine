@@ -188,11 +188,10 @@ under the License.
 			<version>${drools.version}</version>
 		</dependency>
 
-<!--		1.14.4有bug，所以切到1.14.5-->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-connector-kafka_2.12</artifactId>
-			<version>1.14.5</version>
+			<artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
+			<version>${flink.version}</version>
 		</dependency>
 
 	</dependencies>

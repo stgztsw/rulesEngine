@@ -112,7 +112,7 @@ public class RuleEngineProperties implements Serializable {
   }
 
   public String getKafkaSinkTopic() {
-    return PROPERTIES.getProperty(ConfigConstant.KAFKA_SINK_TOPIC);
+    return params.get(ConfigConstant.KAFKA_SINK_TOPIC);
   }
 
   public String getRulePackageName() {

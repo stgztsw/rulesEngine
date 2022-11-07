@@ -7,6 +7,7 @@ declare IeTicketDistributePojo
     guarantees: String //保内保外
     charge_type: String //工时收费
     serve_type: String //现场处理
+    kafka_key: String //推送服务
     incident_desc: String //故障描述
     fae: String //fae
     robot_abnormal_score: Double //年龄
@@ -40,7 +41,7 @@ end
 
 rule "rule1"
     when
-        $pojo : IeTicketDistributePojo(distribute_score > 60)
+        $pojo : IeTicketDistributePojo(distribute_score > 60 && status == '已交付-正常使用')
     then
         $pojo.setDistribute(true);
 end
