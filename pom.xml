@@ -89,20 +89,13 @@ under the License.
 			<scope>provided</scope>
 		</dependency>
 
-
-		<!-- Add connector dependencies here. They must be in the default scope (compile). -->
-
-		<!-- Example:
-
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
+			<scope>provided</scope>
 		</dependency>
-		-->
 
-		<!-- Add logging framework, to produce console output when running in the IDE. -->
-		<!-- These dependencies are excluded from the application JAR by default. -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
@@ -126,24 +119,19 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-shaded-hadoop-2-uber</artifactId>
 			<version>3.2.1-10.0</version>
-			<systemPath>/Users/tangshiwei/branch/flink-shaded/flink-shaded-hadoop-2-parent/flink-shaded-hadoop-2-uber/target/flink-shaded-hadoop-2-uber-3.2.1-10.0.jar</systemPath>
-			<scope>system</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.aliyun.jindodata</groupId>
 			<artifactId>jindo-core</artifactId>
 			<version>4.4.0</version>
-			<systemPath>/Users/tangshiwei/branch/datax/target/datax/datax/plugin/writer/hdfswriter/libs/jindo-core-4.4.0.jar</systemPath>
-			<scope>system</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.aliyun.jindodata</groupId>
 			<artifactId>jindo-sdk</artifactId>
 			<version>4.4.0</version>
-			<systemPath>/Users/tangshiwei/branch/datax/target/datax/datax/plugin/writer/hdfswriter/libs/jindo-sdk-4.4.0.jar</systemPath>
-			<scope>system</scope>
 		</dependency>
 
 		<dependency>
@@ -153,15 +141,21 @@ under the License.
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-connector-jdbc_2.12</artifactId>
-			<version>${flink.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.hive</groupId>
 			<artifactId>hive-exec</artifactId>
 			<version>${hive.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.codehaus.janino</groupId>
+					<artifactId>janino</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-jdbc_2.12</artifactId>
+			<version>${flink.version}</version>
 		</dependency>
 
 		<dependency>
@@ -187,13 +181,6 @@ under the License.
 			<artifactId>drools-compiler</artifactId>
 			<version>${drools.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
-			<version>${flink.version}</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -245,6 +232,7 @@ under the License.
 								</filter>
 							</filters>
 							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>com.gs.rules.engine.BatchJob</mainClass>
 								</transformer>

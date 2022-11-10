@@ -1,5 +1,6 @@
 package com.gs.rules.engine.config;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
@@ -9,10 +10,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+import static com.gs.rules.engine.config.ConfigConstant.RUN_ENV;
+
 public class RuleEngineProperties implements Serializable {
 
   private static final Logger logger = LoggerFactory.getLogger(RuleEngineProperties.class);
-  private static final String PROPERTIES_FILE = "/conf.properties";
+  private static final String PROPERTIES_FILE = "conf.properties";
   private static Properties PROPERTIES;
 
   private static ParameterTool params;
@@ -27,7 +30,9 @@ public class RuleEngineProperties implements Serializable {
   }
 
   public void init() throws IOException {
-    PROPERTIES = PropertiesHelper.loadProperties(PROPERTIES_FILE);
+    Preconditions.checkNotNull(params.get(ConfigConstant.RUN_ENV),
+        String.format("Param %s can not null", RUN_ENV));
+    PROPERTIES = PropertiesHelper.loadProperties(PROPERTIES_FILE, params.get(ConfigConstant.RUN_ENV));
   }
 
   public String getAppID() {
@@ -121,6 +126,10 @@ public class RuleEngineProperties implements Serializable {
 
   public String getRuleFactName() {
     return params.get(ConfigConstant.RULE_FACT_NAME);
+  }
+
+  public String getRunEnv() {
+    return params.get(ConfigConstant.RUN_ENV);
   }
 
 }

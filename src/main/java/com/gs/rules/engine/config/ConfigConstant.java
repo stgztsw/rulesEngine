@@ -5,6 +5,7 @@ public interface ConfigConstant {
   String APP_ID = "app.id";
   String BIZ_DATE = "biz.date";
   String RUN_MODE = "run.mode";
+  String RUN_ENV = "run.env";
 
   //flink
   String FLINK_PARALLELISM = "flink.parallelism";

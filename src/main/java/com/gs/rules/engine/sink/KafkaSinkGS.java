@@ -12,7 +12,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.types.Row;
 
 import java.util.Objects;
-import java.util.Properties;
 
 public class KafkaSinkGS extends BaseSink {
 
@@ -46,16 +45,13 @@ public class KafkaSinkGS extends BaseSink {
   }
 
   private KafkaSink<String> getKafkaSink(RuleEngineProperties ruleProperties) {
-    Properties kafkaProducerConfig = new Properties();
     KafkaSink<String> sink = KafkaSink.<String>builder()
         .setBootstrapServers(ruleProperties.getKafkaBootstrapServers())
-        .setKafkaProducerConfig(kafkaProducerConfig)
         .setRecordSerializer(KafkaRecordSerializationSchema.builder()
             .setTopic(ruleProperties.getKafkaSinkTopic())
             .setKeySerializationSchema(new SimpleStringKafkaKeySchema())
             .setValueSerializationSchema(new SimpleStringSchema())
-            .build()
-        )
+            .build())
         .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
         .build();
     return sink;

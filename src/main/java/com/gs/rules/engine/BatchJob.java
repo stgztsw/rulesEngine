@@ -18,6 +18,7 @@
 
 package com.gs.rules.engine;
 
+import com.gs.rules.engine.common.Constant;
 import com.gs.rules.engine.common.ParamValidator;
 import com.gs.rules.engine.config.RuleEngineProperties;
 import com.gs.rules.engine.process.RuleProcessFunction;
@@ -25,6 +26,7 @@ import com.gs.rules.engine.process.SinkProcess;
 import com.gs.rules.engine.source.HiveSourceFactory;
 import com.gs.rules.engine.source.RuleSourceFactory;
 import com.gs.rules.engine.util.TypeUtil;
+import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.BroadcastConnectedStream;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
@@ -62,6 +64,7 @@ public class BatchJob {
 		ParamValidator.validate(ruleProperties);
 		StreamExecutionEnvironment env = getStreamExecutionEnvironment(ruleProperties);
 		StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings.inBatchMode());
+		configTableEnv(tableEnv);
 
 		DataStream<Row> hiveSourceTableStream = HiveSourceFactory.getHiveSource(tableEnv, ruleProperties);
 		BroadcastStream<Row> ruleBroadcastSource = RuleSourceFactory.getRuleBroadcastSource(tableEnv, ruleProperties);
@@ -75,12 +78,25 @@ public class BatchJob {
 		SinkProcess sinkProcess = new SinkProcess(ruleProperties, tableEnv,
 				TypeUtil.convert2Schema(hiveSourceTableStream.getType()));
 		sinkProcess.toSink(singleOutput);
-		env.execute("Flink batch rule engine");
+		execute(env, ruleProperties);
+	}
+
+	private static void configTableEnv(StreamTableEnvironment tableEnv) {
+		tableEnv.getConfig().getConfiguration().setInteger("table.exec.hive.infer-source-parallelism.max", 4);
+		tableEnv.getConfig().getConfiguration().setBoolean("table.dml-sync", true);
+	}
+
+	private static void execute(StreamExecutionEnvironment env, RuleEngineProperties ruleProperties) throws Exception {
+		//report的场合由executeInsert提交任务，所以无需重复提交
+		if (!Constant.RUN_MODE_REPORT.equals(ruleProperties.getRunMode())) {
+			env.execute("Flink batch rule engine");
+		}
 	}
 
 	private static StreamExecutionEnvironment getStreamExecutionEnvironment(RuleEngineProperties ruleProperties) {
 		int globalParallelism = ruleProperties.getFlinkParallelism();
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		env.setRuntimeMode(RuntimeExecutionMode.BATCH);
 		env.setParallelism(globalParallelism);
 
 		//checkpoint

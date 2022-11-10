@@ -5,6 +5,7 @@ import com.gs.rules.engine.config.RuleEngineProperties;
 import com.gs.rules.engine.sink.BaseSink;
 import com.gs.rules.engine.sink.HiveSinkGS;
 import com.gs.rules.engine.sink.KafkaSinkGS;
+import com.gs.rules.engine.sink.PrintSink;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Schema;
@@ -31,6 +32,8 @@ public class SinkProcess {
         return new HiveSinkGS(ruleProperties, tableEnv, schema);
       case Constant.RUN_MODE_KAFKA :
         return new KafkaSinkGS(ruleProperties);
+      case Constant.RUN_MODE_PRINT:
+        return new PrintSink();
       default:
         throw new RuntimeException(String.format("no supported sink of %s", ruleProperties.getRunMode()));
     }

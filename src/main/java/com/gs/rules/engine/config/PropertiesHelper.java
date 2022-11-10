@@ -16,9 +16,9 @@ public class PropertiesHelper {
   private static final Logger logger = LoggerFactory.getLogger(PropertiesHelper.class);
   private static final Pattern QUOTE_PATTERN = Pattern.compile("\\'");
 
-  public static Properties loadProperties(String fileName) throws IOException {
+  public static Properties loadProperties(String fileName, String env) throws IOException {
     Properties properties = new Properties();
-    InputStream inputStream = PropertiesHelper.class.getResourceAsStream(fileName);
+    InputStream inputStream = PropertiesHelper.class.getResourceAsStream(String.format("/%s_%s", env, fileName));
     if (null == inputStream) {
       logger.error(fileName + " does not exist");
       throw new FileNotFoundException(fileName + " does not exist");
